@@ -24,8 +24,10 @@ not_op = Operator(not_matrix)
 # Funkcia na vytvorenie kvantového obvodu s operátorom
 def create_quantum_circuit(op, label):
     qc = QuantumCircuit(2)
-    qc.x(0)
+    qc.x(1)
+    qc.h()
     qc.unitary(op, [1, 0], label=label)  # Aplikuj Oracle
+    qc.h(0)
     qc.measure_all()  # Meranie všetkých qubitov
     return qc
 
