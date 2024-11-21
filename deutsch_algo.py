@@ -24,6 +24,7 @@ identity_op = Operator(identity_matrix)
 # Funkcia na vytvorenie kvantového obvodu s Oracle
 def create_quantum_circuit(op, label):
     qc = QuantumCircuit(2, 1)  # 2 qubity, 1 klasický register
+    qc.x(1)
     qc.h([0, 1])               # Aplikuj Hadamard na oba qubity
     qc.unitary(op, [1, 0], label=label)  # Aplikuj Oracle
     qc.h(0)                    # Aplikuj Hadamard na prvý qubit
