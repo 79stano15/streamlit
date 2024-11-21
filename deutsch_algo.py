@@ -9,49 +9,48 @@ import matplotlib.pyplot as plt
 st.title("Deutschov Algoritmus s Qiskit 🚀")
 st.header("Kvantový obvod")
 
-# Vytvorenie matic operatorov
-constant_zero = [[1,0,0,0], [0,1,0,0], [0,0,0,1], [0,0,1,0]]
-constant_one = [[0,1,0,0], [1,0,0,0], [0,0,0,1], [0,0,1,0]]
-identity_matrix = [[1,0,0,0], [0,1,0,0], [0,0,1,0], [0,0,0,1]]
-not_matrix = [[0,1,0,0], [1,0,0,0], [0,0,1,0], [0,0,0,1]]
+# Vytvorenie Oracle operátorov
+constant_zero = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]  # Vždy vráti 0
+constant_one = [[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]  # Vždy vráti 1
+balanced_not = [[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]]  # Vyvážená: NOT
+identity_matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]  # Totožnosť (Identity)
 
-# Vytvorenie operatorov
+# Vytvorenie Operator objektov
 const_0 = Operator(constant_zero)
 const_1 = Operator(constant_one)
-identity = Operator(identity_matrix)
-not_op = Operator(not_matrix)
+balanced_op = Operator(balanced_not)
+identity_op = Operator(identity_matrix)
 
-# Funkcia na vytvorenie kvantového obvodu s operátorom
+# Funkcia na vytvorenie kvantového obvodu s Oracle
 def create_quantum_circuit(op, label):
-    qc = QuantumCircuit(2)
-    qc.x(1)
-    qc.h([0,1])
+    qc = QuantumCircuit(2, 1)  # 2 qubity, 1 klasický register
+    qc.h([0, 1])               # Aplikuj Hadamard na oba qubity
     qc.unitary(op, [1, 0], label=label)  # Aplikuj Oracle
-    qc.h(0)
-    qc.measure_all()  # Meranie všetkých qubitov
+    qc.h(0)                    # Aplikuj Hadamard na prvý qubit
+    qc.measure(0, 0)           # Meraj prvý qubit
     return qc
 
-# Vytvorenie obvodov pre rôzne operátory
+# Vytvorenie obvodov pre rôzne Oracle operátory
 qc_const_0 = create_quantum_circuit(const_0, 'Const_0')
 qc_const_1 = create_quantum_circuit(const_1, 'Const_1')
-qc_identity = create_quantum_circuit(identity, 'Identity')
-qc_not = create_quantum_circuit(not_op, 'NOT')
+qc_balanced = create_quantum_circuit(balanced_op, 'Balanced')
+qc_identity = create_quantum_circuit(identity_op, 'Identity')
 
-# Výber Oracle z Streamlit rozhrania
+# Výber Oracle z rozhrania Streamlit
 st.sidebar.header("Vyber Oracle")
 oracle_choice = st.sidebar.selectbox(
-    "Zvoľ Oracle:", ["Constant Zero", "Constant One", "Identity", "NOT"]
+    "Zvoľ Oracle:", ["Constant Zero", "Constant One", "Balanced (NOT)", "Identity"]
 )
 
-# Výber kvantového obvodu na základe výberu používateľa
+# Vyber kvantový obvod na základe výberu
 if oracle_choice == "Constant Zero":
     qc = qc_const_0
 elif oracle_choice == "Constant One":
     qc = qc_const_1
-elif oracle_choice == "Identity":
-    qc = qc_identity
+elif oracle_choice == "Balanced (NOT)":
+    qc = qc_balanced
 else:
-    qc = qc_not
+    qc = qc_identity
 
 # Zobrazenie vybraného obvodu
 st.subheader(f"Vybraný Oracle: {oracle_choice}")
