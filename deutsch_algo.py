@@ -26,7 +26,7 @@ def create_quantum_circuit(op, label):
     qc = QuantumCircuit(2)
     qc.x(1)
     qc.h([0,1])
-    qc.unitary(op, [1, 0], label=label)  # Aplikuj Oracle
+    qc.unitary(op, [0, 1], label=label)  # Aplikuj Oracle
     qc.h(0)
     qc.measure_all()  # Meranie všetkých qubitov
     return qc
