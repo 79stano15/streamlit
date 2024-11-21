@@ -1,7 +1,5 @@
 import streamlit as st
-from qiskit import QuantumCircuit, transpile
-from qiskit.quantum_info.operators import Operator
-from qiskit_aer import AerSimulator
+from qiskit import QuantumCircuit, Aer, transpile
 from qiskit.visualization import plot_histogram
 import matplotlib.pyplot as plt
 
@@ -9,55 +7,53 @@ import matplotlib.pyplot as plt
 st.title("Deutschov Algoritmus s Qiskit 🚀")
 st.header("Kvantový obvod")
 
-# Vytvorenie Oracle operátorov
-constant_zero = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]  # Vždy vráti 0
-constant_one = [[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]  # Vždy vráti 1
-balanced_not = [[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]]  # Vyvážená: NOT
-identity_matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]  # Totožnosť (Identity)
+# Funkcia na vytvorenie Oracle operátorov
+def constant_oracle(is_one):
+    """Konštantný Oracle"""
+    qc = QuantumCircuit(2)
+    if is_one:
+        qc.x(1)  # Ak je konštantná 1, invertuj druhý qubit
+    return qc.to_gate(label="Const")
 
-# Vytvorenie Operator objektov
-const_0 = Operator(constant_zero)
-const_1 = Operator(constant_one)
-balanced_op = Operator(balanced_not)
-identity_op = Operator(identity_matrix)
+def balanced_oracle():
+    """Vyvážený Oracle"""
+    qc = QuantumCircuit(2)
+    qc.cx(0, 1)  # CNOT brána: Vyvážené správanie
+    return qc.to_gate(label="Balanced")
 
-# Funkcia na vytvorenie kvantového obvodu s Oracle
-def create_quantum_circuit(op, label):
+# Funkcia na vytvorenie Deutschovho algoritmu
+def deutsch_algorithm(oracle):
     qc = QuantumCircuit(2, 1)  # 2 qubity, 1 klasický register
-    qc.h([0, 1])               # Aplikuj Hadamard na oba qubity
-    qc.unitary(op, [1, 0], label=label)  # Aplikuj Oracle
-    qc.h(0)                    # Aplikuj Hadamard na prvý qubit
+    qc.x(1)                    # Inicializuj druhý qubit do stavu |1⟩
+    qc.h([0, 1])               # Hadamard na oba qubity
+    qc.append(oracle, [0, 1])  # Aplikuj Oracle
+    qc.h(0)                    # Hadamard na prvý qubit
     qc.measure(0, 0)           # Meraj prvý qubit
     return qc
 
-# Vytvorenie obvodov pre rôzne Oracle operátory
-qc_const_0 = create_quantum_circuit(const_0, 'Const_0')
-qc_const_1 = create_quantum_circuit(const_1, 'Const_1')
-qc_balanced = create_quantum_circuit(balanced_op, 'Balanced')
-qc_identity = create_quantum_circuit(identity_op, 'Identity')
-
-# Výber Oracle z rozhrania Streamlit
+# Výber Oracle z Streamlit rozhrania
 st.sidebar.header("Vyber Oracle")
 oracle_choice = st.sidebar.selectbox(
-    "Zvoľ Oracle:", ["Constant Zero", "Constant One", "Balanced (NOT)", "Identity"]
+    "Zvoľ Oracle:", ["Constant Zero", "Constant One", "Balanced"]
 )
 
-# Vyber kvantový obvod na základe výberu
+# Vyber správny Oracle na základe voľby používateľa
 if oracle_choice == "Constant Zero":
-    qc = qc_const_0
+    oracle = constant_oracle(is_one=False)
 elif oracle_choice == "Constant One":
-    qc = qc_const_1
-elif oracle_choice == "Balanced (NOT)":
-    qc = qc_balanced
+    oracle = constant_oracle(is_one=True)
 else:
-    qc = qc_identity
+    oracle = balanced_oracle()
 
-# Zobrazenie vybraného obvodu
+# Vytvor Deutschov algoritmus s vybraným Oracle
+qc = deutsch_algorithm(oracle)
+
+# Zobrazenie kvantového obvodu
 st.subheader(f"Vybraný Oracle: {oracle_choice}")
 st.pyplot(qc.draw(output='mpl'))
 
 # Simulácia výsledkov pomocou AerSimulator
-simulator = AerSimulator()
+simulator = Aer.get_backend('aer_simulator')
 compiled_circuit = transpile(qc, simulator)
 job = simulator.run(compiled_circuit, shots=1024)
 result = job.result()
