@@ -9,16 +9,16 @@ import matplotlib.pyplot as plt
 st.title("Deutschov Algoritmus s Qiskit 🚀")
 st.header("Kvantový obvod a Matica Oracle")
 
-# Definícia Oracle operátorov ako matíc
+# Správne definované matice Oracle
 constant_zero = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]  # Konštantná 0
 constant_one = [[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]  # Konštantná 1
-balanced_not = [[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]]  # Vyvážený Oracle: NOT
+balanced_cnot = [[1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 1]]  # Vyvážený CNOT
 identity_matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]  # Totožnosť
 
 # Vytvorenie Operator objektov
 const_0 = Operator(constant_zero)
 const_1 = Operator(constant_one)
-balanced_op = Operator(balanced_not)
+balanced_op = Operator(balanced_cnot)
 identity_op = Operator(identity_matrix)
 
 # Funkcia na vytvorenie Deutschovho algoritmu
@@ -26,24 +26,24 @@ def deutsch_algorithm(oracle, label):
     qc = QuantumCircuit(2, 1)  # 2 qubity, 1 klasický register
     qc.x(1)                    # Inicializuj druhý qubit do stavu |1⟩
     qc.h([0, 1])               # Hadamard na oba qubity
-    qc.append(oracle, [1, 0])  # Aplikuj Oracle (ako matica)
+    qc.append(oracle, [1, 0])  # Aplikuj Oracle
     qc.h(0)                    # Hadamard na prvý qubit
     qc.measure(0, 0)           # Meraj prvý qubit
     return qc
 
-# Výber Oracle z Streamlit rozhrania
+# Výber Oracle z rozhrania Streamlit
 st.sidebar.header("Vyber Oracle")
 oracle_choice = st.sidebar.selectbox(
-    "Zvoľ Oracle:", ["Constant Zero", "Constant One", "Balanced NOT", "Identity"]
+    "Zvoľ Oracle:", ["Constant Zero", "Constant One", "Balanced CNOT", "Identity"]
 )
 
-# Výber správneho Oracle a jeho matice
+# Výber Oracle a matice
 if oracle_choice == "Constant Zero":
     oracle, matrix, label = const_0, constant_zero, "Const_0"
 elif oracle_choice == "Constant One":
     oracle, matrix, label = const_1, constant_one, "Const_1"
-elif oracle_choice == "Balanced NOT":
-    oracle, matrix, label = balanced_op, balanced_not, "Balanced"
+elif oracle_choice == "Balanced CNOT":
+    oracle, matrix, label = balanced_op, balanced_cnot, "Balanced_CNOT"
 else:
     oracle, matrix, label = identity_op, identity_matrix, "Identity"
 
@@ -54,7 +54,7 @@ qc = deutsch_algorithm(oracle, label)
 st.subheader(f"Matica Oracle pre: {oracle_choice}")
 st.write(matrix)
 
-# Zobrazenie vybraného obvodu
+# Zobrazenie kvantového obvodu
 st.subheader(f"Kvantový obvod pre: {oracle_choice}")
 st.pyplot(qc.draw(output='mpl'))
 
