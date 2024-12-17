@@ -1,5 +1,7 @@
 import streamlit as st
-from qiskit import QuantumCircuit, Aer, transpile
+from qiskit import QuantumCircuit, transpile
+from qiskit.quantum_info.operators import Operator
+from qiskit_aer.backends import AerSimulator  # Opravený import
 from qiskit.visualization import plot_histogram
 import matplotlib.pyplot as plt
 
@@ -53,7 +55,7 @@ st.subheader(f"Vybraný Oracle: {oracle_choice}")
 st.pyplot(qc.draw(output='mpl'))
 
 # Simulácia výsledkov pomocou AerSimulator
-simulator = Aer.get_backend('aer_simulator')
+simulator = AerSimulator()  # Opravené vytvorenie simulátora
 compiled_circuit = transpile(qc, simulator)
 job = simulator.run(compiled_circuit, shots=1024)
 result = job.result()
