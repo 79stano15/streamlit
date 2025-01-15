@@ -1,61 +1,65 @@
 import streamlit as st
+import numpy as np
 from qiskit import QuantumCircuit, transpile
 from qiskit.quantum_info.operators import Operator
-from qiskit_aer.backends import AerSimulator
+from qiskit_aer import AerSimulator
 from qiskit.visualization import plot_histogram
 import matplotlib.pyplot as plt
 
 # Nastavenie stránky Streamlit
 st.title("Deutschov Algoritmus s Qiskit 🚀")
-st.header("Kvantový obvod a Matica Oracle")
+st.header("Kvantový obvod")
 
-# Správne definované matice Oracle
-constant_zero = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]  # Konštantná 0
-constant_one = [[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]  # Konštantná 1
-balanced_cnot = [[1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 1]]  # Vyvážený CNOT
-identity_matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]  # Totožnosť
+# Vytvorenie opravených matic operátorov
+constant_zero = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+constant_one = [[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]]
+identity_matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]]
+not_matrix = [[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 
-# Vytvorenie Operator objektov
+# Vytvorenie operatorov
 const_0 = Operator(constant_zero)
 const_1 = Operator(constant_one)
-balanced_op = Operator(balanced_cnot)
-identity_op = Operator(identity_matrix)
+identity = Operator(identity_matrix)
+not_op = Operator(not_matrix)
 
-# Funkcia na vytvorenie Deutschovho algoritmu
-def deutsch_algorithm(oracle, label):
-    qc = QuantumCircuit(2, 1)  # 2 qubity, 1 klasický register
-    qc.x(1)                    # Inicializuj druhý qubit do stavu |1⟩
-    qc.h([0, 1])               # Hadamard na oba qubity
-    qc.append(oracle, [1, 0])  # Aplikuj Oracle
-    qc.h(0)                    # Hadamard na prvý qubit
-    qc.measure(0, 0)           # Meraj prvý qubit
+# Funkcia na vytvorenie kvantového obvodu s operátorom
+def create_quantum_circuit(op, label):
+    qc = QuantumCircuit(2, 1)
+    qc.x(1)
+    qc.h([0, 1])
+    qc.unitary(op, [1, 0], label=label)  # Aplikuj Oracle
+    qc.h(0)  # Aplikuj Hadamardovu bránu na prvý qubit
+    qc.measure(0,0)  # Meranie
     return qc
 
-# Výber Oracle z rozhrania Streamlit
+# Vytvorenie obvodov pre rôzne operátory
+qc_const_0 = create_quantum_circuit(const_0, 'Const_0')
+qc_const_1 = create_quantum_circuit(const_1, 'Const_1')
+qc_identity = create_quantum_circuit(identity, 'Identity')
+qc_not = create_quantum_circuit(not_op, 'NOT')
+
+# Výber Oracle z Streamlit rozhrania
 st.sidebar.header("Vyber Oracle")
 oracle_choice = st.sidebar.selectbox(
-    "Zvoľ Oracle:", ["Constant Zero", "Constant One", "Balanced CNOT", "Identity"]
+    "Zvoľ Oracle:", ["Constant Zero", "Constant One", "Identity", "NOT"]
 )
 
-# Výber Oracle a matice
+# Výber kvantového obvodu na základe výberu používateľa
 if oracle_choice == "Constant Zero":
-    oracle, matrix, label = const_0, constant_zero, "Const_0"
+    qc = qc_const_0
+    selected_matrix = constant_zero
 elif oracle_choice == "Constant One":
-    oracle, matrix, label = const_1, constant_one, "Const_1"
-elif oracle_choice == "Balanced CNOT":
-    oracle, matrix, label = balanced_op, balanced_cnot, "Balanced_CNOT"
+    qc = qc_const_1
+    selected_matrix = constant_one
+elif oracle_choice == "Identity":
+    qc = qc_identity
+    selected_matrix = identity_matrix
 else:
-    oracle, matrix, label = identity_op, identity_matrix, "Identity"
+    qc = qc_not
+    selected_matrix = not_matrix
 
-# Vytvor Deutschov algoritmus s vybraným Oracle
-qc = deutsch_algorithm(oracle, label)
-
-# Zobrazenie matice Oracle
-st.subheader(f"Matica Oracle pre: {oracle_choice}")
-st.write(matrix)
-
-# Zobrazenie kvantového obvodu
-st.subheader(f"Kvantový obvod pre: {oracle_choice}")
+# Zobrazenie vybraného obvodu
+st.subheader(f"Vybraný Oracle: {oracle_choice}")
 st.pyplot(qc.draw(output='mpl'))
 
 # Simulácia výsledkov pomocou AerSimulator
@@ -75,3 +79,16 @@ st.pyplot(fig)
 st.subheader("Pozorované výstupy")
 for outcome in counts:
     st.write(f"{outcome} bolo pozorované {counts[outcome]} krát")
+
+# Zobrazenie matice Oracle
+st.header("Matica Oracle")
+fig, ax = plt.subplots()
+ax.matshow(np.zeros_like(selected_matrix), cmap="binary")  # Pozadie matice (prázdne hodnoty)
+
+# Pridanie hodnôt priamo do matice
+for (i, j), val in np.ndenumerate(selected_matrix):
+    ax.text(j, i, f"{val}", ha='center', va='center', fontsize=14)  # Čísla na správne pozície
+
+ax.set_xticks([])  # Skrytie číslovania stĺpcov
+ax.set_yticks([])  # Skrytie číslovania riadkov
+st.pyplot(fig)
