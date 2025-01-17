@@ -6,3 +6,10 @@ na papier a naozaj su pol na pol a je teda balancovana.. V tomto stave ako je te
 same 1 na vystupe a teda pri prevode je niekde chyba.. Na tu maticu z ktorej vytvaram orakulum. Bude tam problem s cislovanim qubitov a tym ako sa vytvara ta samotna
 matica.. S tymto som stravil vacsinu dna, ale pacila sa mi myslienka ze tu balancovanu si budem zakazdym generovat nahodne. Obvod je spravny, len tie prevody musim
 poriesit. Dalsi som neskusal, lebo chcem mat tento hotovy a aj tak je to matuce po dlhej pauze, kedze som pozabudal. 
+
+
+linky:
+
+https://app-djovnnxje27m6efmeqqjg3.streamlit.app/
+
+https://app-5jcxrt6ttfz8szidfir2vu.streamlit.app/
