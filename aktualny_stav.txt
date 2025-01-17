@@ -1,0 +1,8 @@
+Zhrniem aktualny stav tuto. K tomu deutsch som mal chybu v tom ze qiskit tie qubity cisluje inak a teda, mali byt vymenene a nie ako sme pocitali na papier. 
+Teraz to gunguje ako ma, aj to na spodku vykresluje tu maticu, ktoru som pouzil na orakulum. Potom som skusal rozsirenie na viac qubitov, s tym ze tam mam identitu
+ako konstantnu funkciu. Tu balancovanu som si skomplikoval a myslienku som mal taku, ze si vymyslim hocijaku kombinaciu tak aby to vracalo rovnaky pocet 0 a 1,
+spatne potom k tomu zistim o aku funkciu ide.. Tato cast prekvapivo tiez funguje aj ked uplne neviem ako, ale skusal som si par tych vygenerovanych funkcii rozpisat
+na papier a naozaj su pol na pol a je teda balancovana.. V tomto stave ako je teraz to funguje vacsinu casu ked mam 2 + 1 pomocny qubit, pri 3 a viac uz nemam 
+same 1 na vystupe a teda pri prevode je niekde chyba.. Na tu maticu z ktorej vytvaram orakulum. Bude tam problem s cislovanim qubitov a tym ako sa vytvara ta samotna
+matica.. S tymto som stravil vacsinu dna, ale pacila sa mi myslienka ze tu balancovanu si budem zakazdym generovat nahodne. Obvod je spravny, len tie prevody musim
+poriesit. Dalsi som neskusal, lebo chcem mat tento hotovy a aj tak je to matuce po dlhej pauze, kedze som pozabudal. 
